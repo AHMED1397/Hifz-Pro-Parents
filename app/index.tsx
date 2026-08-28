@@ -1,38 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
 import { HAS_SUPABASE } from '@/data/datasource';
-import { supabase } from '@/data/supabase';
+import { useApp } from '@/context/AppProviders';
 import { Gradients, Colors } from '@/theme/tokens';
 
 /**
  * Entry gate.
  *
- * With Supabase configured it requires a signed-in parent (Phase 0/6). Without
- * keys it goes straight to the dashboard on the demo family, so the app is
- * reviewable with no backend at all.
+ * The deployed project has no Supabase Auth, so the session is the persisted
+ * guardian number (or the demo flag) rather than an auth session — see gap G11.
+ * `AppProviders` restores both from AsyncStorage before `booting` clears, so
+ * this only decides once the saved state is known.
  */
 export default function IndexRedirect() {
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
+  const { booting, guardianPhone, demoMode } = useApp();
 
   useEffect(() => {
-    (async () => {
-      if (!HAS_SUPABASE || !supabase) {
-        router.replace('/(tabs)');
-        setChecking(false);
-        return;
-      }
-      const { data } = await supabase.auth.getSession();
-      router.replace(data.session ? '/(tabs)' : '/(auth)/login');
-      setChecking(false);
-    })();
-  }, [router]);
+    if (booting) return;
+    const signedIn = !!guardianPhone || demoMode || !HAS_SUPABASE;
+    router.replace(signedIn ? '/(tabs)' : '/(auth)/login');
+  }, [booting, guardianPhone, demoMode, router]);
 
-  if (!checking) return null;
+  if (!booting) return null;
 
   return (
     <LinearGradient

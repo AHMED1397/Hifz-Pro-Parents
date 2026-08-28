@@ -11,13 +11,13 @@ interface StatusChipProps {
 }
 
 const statusConfig = {
-  done: { bg: Colors.successWash, text: '#0B7D4E', dot: Colors.success, icon: '✓', labelKey: 'common.done' },
-  present: { bg: Colors.successWash, text: '#0B7D4E', dot: Colors.success, icon: '✓', labelKey: 'present' },
-  behind: { bg: Colors.warningWash, text: '#9A5E00', dot: Colors.warning, icon: '!', labelKey: 'behind' },
-  absent: { bg: Colors.dangerWash, text: '#B22525', dot: Colors.danger, icon: '✕', labelKey: 'absent' },
-  late: { bg: Colors.dangerWash, text: '#B22525', dot: Colors.danger, icon: '⏰', labelKey: 'attendanceStatus.late' },
-  pending: { bg: '#EEF2F8', text: Colors.textSecondary, dot: Colors.textMuted, icon: '•', labelKey: 'notYet' },
-  leave: { bg: Colors.primaryWash, text: Colors.primaryDark, dot: Colors.primary, icon: '↪', labelKey: 'leave' },
+  done: { bg: Colors.successWash, text: '#0B7D4E', dot: Colors.success, icon: 'checkmark', labelKey: 'common.done' },
+  present: { bg: Colors.successWash, text: '#0B7D4E', dot: Colors.success, icon: 'checkmark', labelKey: 'present' },
+  behind: { bg: Colors.warningWash, text: '#9A5E00', dot: Colors.warning, icon: 'alert', labelKey: 'behind' },
+  absent: { bg: Colors.dangerWash, text: '#B22525', dot: Colors.danger, icon: 'close', labelKey: 'absent' },
+  late: { bg: Colors.dangerWash, text: '#B22525', dot: Colors.danger, icon: 'time-outline', labelKey: 'attendanceStatus.late' },
+  pending: { bg: '#EEF2F8', text: Colors.textSecondary, dot: Colors.textMuted, icon: 'ellipse', labelKey: 'notYet' },
+  leave: { bg: Colors.primaryWash, text: Colors.primaryDark, dot: Colors.primary, icon: 'arrow-undo', labelKey: 'leave' },
 };
 
 export const StatusChip: React.FC<StatusChipProps> = ({

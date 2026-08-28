@@ -29,7 +29,7 @@ import {
 import { getMushafPage, getPageAyahs, getPageInfo, hasMushafFile, MUSHAF_PAGES } from '../src/data/mushaf';
 import { getSurahById } from '../src/data/surahs';
 import { calculateQuranProgress, getGradeFromTotal } from '../src/lib/score';
-import { buildHeatmapDays, toWeeks, fillFor, toISODate, FRIDAY_FILL } from '../src/lib/heatmap';
+import { buildHeatmapDays, toWeeks, fillFor, toISODate, heatmapTotals, FRIDAY_FILL } from '../src/lib/heatmap';
 
 let checks = 0;
 const ok = (label: string, cond: unknown, detail = '') => {
@@ -182,6 +182,15 @@ ok(
 );
 ok('fillFor gives Fridays the off-day colour', fillFor(days.find(d => d.state === 'friday')!) === FRIDAY_FILL);
 ok('fillFor distinguishes fail from pass', fillFor({ ...days[0], state: 'fail' }) !== fillFor({ ...days[0], state: 'pass' }));
+
+const totals = heatmapTotals(days);
+ok('Totals reconcile with the day list',
+  totals.lessons === days.reduce((s, d) => s + d.total, 0), `${totals.lessons} lessons`);
+ok('Totals split into passed and repeated', totals.passed + totals.failed === totals.lessons,
+  `${totals.passed}/${totals.lessons} passed`);
+ok('Totals count the days that had lessons',
+  totals.activeDays === days.filter(d => d.total > 0).length && totals.activeDays > 0,
+  `${totals.activeDays} active days`);
 
 // ── 5. Shared scoring ───────────────────────────────────────
 console.log('\nShared scoring (src/lib/score.ts)');

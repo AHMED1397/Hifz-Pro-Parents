@@ -3,9 +3,9 @@ import { View, Pressable, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 import { DataSource } from '@/data/datasource';
-import { getTeacherById } from '@/data/mock';
 import { MushafTracker } from '@/components/MushafTracker';
 import { LessonDetailModal } from '@/components/LessonDetailModal';
 import { useApp } from '@/context/AppProviders';
@@ -19,7 +19,7 @@ import type { DailyEntry } from '@/data/types';
 export default function MushafScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { activeChild } = useApp();
+  const { activeChild, teacherName } = useApp();
   const params = useLocalSearchParams<{ studentId?: string; page?: string }>();
   const [inspecting, setInspecting] = useState<DailyEntry | null>(null);
 
@@ -38,7 +38,7 @@ export default function MushafScreen() {
     <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: Colors.background }}>
       <View style={styles.topBar}>
         <Pressable onPress={() => router.back()} style={styles.closeBtn}>
-          <Text style={styles.closeText}>✕</Text>
+          <Ionicons name="close" size={18} color="#fff" />
         </Pressable>
         <Text style={styles.title} numberOfLines={1}>
           {activeChild?.full_name ?? ''}
@@ -49,13 +49,13 @@ export default function MushafScreen() {
       <MushafTracker
         entries={entries}
         initialPage={initialPage}
-        teacherNameFor={id => getTeacherById(id)?.full_name ?? '—'}
+        teacherNameFor={id => teacherName(id)}
         onInspect={setInspecting}
       />
 
       <LessonDetailModal
         entry={inspecting}
-        teacherName={inspecting ? getTeacherById(inspecting.teacher_id)?.full_name ?? '—' : ''}
+        teacherName={inspecting ? teacherName(inspecting.teacher_id) : ''}
         onClose={() => setInspecting(null)}
       />
     </View>

@@ -70,45 +70,45 @@ const p = (
 /** The evening block is identical on all three day types. */
 function eveningPeriods(): Period[] {
   return [
-    p('dinner', h(19, 45), h(20, 0), 'Dinner', 'العشاء', 'இரவு உணவு', 'break', '🍽️'),
-    p('isha', h(20, 0), h(20, 30), 'Isha + Taleem', 'العشاء + التعليم', 'இஷா + தஃலீம்', 'prayer', '🕌'),
-    p('after_isha', h(20, 30), h(21, 30), "After-Isha Lesson", 'درس بعد العشاء', 'இஷாவுக்குப் பின் பாடம்', 'class', '🌙', {
+    p('dinner', h(19, 45), h(20, 0), 'Dinner', 'العشاء', 'இரவு உணவு', 'break', 'restaurant-outline'),
+    p('isha', h(20, 0), h(20, 30), 'Isha + Taleem', 'العشاء + التعليم', 'இஷா + தஃலீம்', 'prayer', 'moon-outline'),
+    p('after_isha', h(20, 30), h(21, 30), "After-Isha Lesson", 'درس بعد العشاء', 'இஷாவுக்குப் பின் பாடம்', 'class', 'moon-outline', {
       isLesson: true,
       note: "Final repetition of next day's Sabaq and Manzil",
     }),
-    p('sleep', h(21, 30), h(24, 0), 'Lights Out', 'النوم', 'தூக்கம்', 'sleep', '😴'),
+    p('sleep', h(21, 30), h(24, 0), 'Lights Out', 'النوم', 'தூக்கம்', 'sleep', 'bed-outline'),
   ];
 }
 
 const FULL_DAY: Period[] = [
-  p('wake', h(3, 45), h(4, 50), 'Wake Up', 'الاستيقاظ', 'விழிப்பு', 'wake', '🌙', {
+  p('wake', h(3, 45), h(4, 50), 'Wake Up', 'الاستيقاظ', 'விழிப்பு', 'wake', 'moon-outline', {
     note: 'The hifz day begins',
   }),
-  p('tea1', h(4, 50), h(5, 5), 'Tea Break', 'استراحة الشاي', 'தேநீர் இடைவேளை', 'break', '☕'),
-  p('fajr', h(5, 5), h(5, 30), 'Fajr Prayer', 'صلاة الفجر', 'ஃபஜ்ர் தொழுகை', 'prayer', '🕌'),
-  p('morning_class', h(5, 30), h(7, 30), 'Morning Sabaq Class', 'درس السبق الصباحي', 'காலை சபக் வகுப்பு', 'class', '🌅', {
+  p('tea1', h(4, 50), h(5, 5), 'Tea Break', 'استراحة الشاي', 'தேநீர் இடைவேளை', 'break', 'cafe-outline'),
+  p('fajr', h(5, 5), h(5, 30), 'Fajr Prayer', 'صلاة الفجر', 'ஃபஜ்ர் தொழுகை', 'prayer', 'moon-outline'),
+  p('morning_class', h(5, 30), h(7, 30), 'Morning Sabaq Class', 'درس السبق الصباحي', 'காலை சபக் வகுப்பு', 'class', 'sunny-outline', {
     isLesson: true,
     lessonType: 'sabaq',
     note: 'Hazrat hears the new lesson — some ustadhs hear it at ~9:00 AM instead',
   }),
-  p('breakfast', h(7, 30), h(8, 30), 'Breakfast Break', 'الإفطار', 'காலை உணவு', 'break', '🍳'),
-  p('class_am', h(8, 30), h(10, 30), 'Class — Sabq then Manzil', 'الدرس: السبقي ثم المنزل', 'வகுப்பு — சப்கீ, பின் மன்ழில்', 'class', '☀️', {
+  p('breakfast', h(7, 30), h(8, 30), 'Breakfast Break', 'الإفطار', 'காலை உணவு', 'break', 'restaurant-outline'),
+  p('class_am', h(8, 30), h(10, 30), 'Class — Sabq then Manzil', 'الدرس: السبقي ثم المنزل', 'வகுப்பு — சப்கீ, பின் மன்ழில்', 'class', 'sunny-outline', {
     isLesson: true,
     lessonType: 'sabqi',
     note: 'Hazrat hears Sabq, then Manzil',
   }),
-  p('tea2', h(10, 30), h(10, 45), 'Tea Break', 'استراحة الشاي', 'தேநீர் இடைவேளை', 'break', '☕'),
-  p('class_late_am', h(10, 45), h(11, 30), 'Class Time', 'وقت الدرس', 'வகுப்பு நேரம்', 'class', '☀️', { isLesson: true }),
-  p('qailulah', h(11, 30), h(12, 30), 'Qailulah (Midday Rest)', 'القيلولة', 'கைலூலா (மதிய ஓய்வு)', 'rest', '😴'),
-  p('lunch_zuhr', h(12, 30), h(13, 25), 'Lunch + Zuhr', 'الغداء + الظهر', 'மதிய உணவு + லுஹர்', 'prayer', '🍛'),
-  p('school', h(13, 25), h(16, 45), 'School Section', 'القسم المدرسي', 'பள்ளிப் பிரிவு', 'school', '🏫', {
+  p('tea2', h(10, 30), h(10, 45), 'Tea Break', 'استراحة الشاي', 'தேநீர் இடைவேளை', 'break', 'cafe-outline'),
+  p('class_late_am', h(10, 45), h(11, 30), 'Class Time', 'وقت الدرس', 'வகுப்பு நேரம்', 'class', 'sunny-outline', { isLesson: true }),
+  p('qailulah', h(11, 30), h(12, 30), 'Qailulah (Midday Rest)', 'القيلولة', 'கைலூலா (மதிய ஓய்வு)', 'rest', 'bed-outline'),
+  p('lunch_zuhr', h(12, 30), h(13, 25), 'Lunch + Zuhr', 'الغداء + الظهر', 'மதிய உணவு + லுஹர்', 'prayer', 'restaurant-outline'),
+  p('school', h(13, 25), h(16, 45), 'School Section', 'القسم المدرسي', 'பள்ளிப் பிரிவு', 'school', 'school-outline', {
     note: 'Sri Lanka local syllabus — Usman (RA) Building',
   }),
-  p('asar', h(16, 45), h(17, 45), 'Asar + Evening Break', 'العصر + الاستراحة', 'அஸர் + மாலை இடைவேளை', 'prayer', '🕌'),
-  p('nazira', h(17, 45), MAGHRIB_NOMINAL, 'An-Nazira / Mashk', 'الناظرة / المشق', 'நழிரா / மஷ்க்', 'nazira', '📖', {
+  p('asar', h(16, 45), h(17, 45), 'Asar + Evening Break', 'العصر + الاستراحة', 'அஸர் + மாலை இடைவேளை', 'prayer', 'moon-outline'),
+  p('nazira', h(17, 45), MAGHRIB_NOMINAL, 'An-Nazira / Mashk', 'الناظرة / المشق', 'நழிரா / மஷ்க்', 'nazira', 'book-outline', {
     note: "Hifz: read tomorrow's new lesson to a senior (~5 min). Girdan: mashk (20+ min). No nazira → tomorrow's Sabaq is cut.",
   }),
-  p('maghrib_lesson', MAGHRIB_NOMINAL, h(19, 45), 'Maghrib + Lesson', 'المغرب + الدرس', 'மக்ரிப் + பாடம்', 'class', '🕌', {
+  p('maghrib_lesson', MAGHRIB_NOMINAL, h(19, 45), 'Maghrib + Lesson', 'المغرب + الدرس', 'மக்ரிப் + பாடம்', 'class', 'moon-outline', {
     isLesson: true,
     note: 'Students sit alone in the masjid memorizing tomorrow\'s Sabaq, or their Sabq / Manzil',
   }),
@@ -116,36 +116,36 @@ const FULL_DAY: Period[] = [
 ];
 
 const FRIDAY: Period[] = [
-  p('wake', h(3, 45), h(4, 50), 'Wake Up', 'الاستيقاظ', 'விழிப்பு', 'wake', '🌙'),
-  p('tea1', h(4, 50), h(5, 5), 'Tea Break', 'استراحة الشاي', 'தேநீர் இடைவேளை', 'break', '☕'),
-  p('fajr', h(5, 5), h(5, 30), 'Fajr Prayer', 'صلاة الفجر', 'ஃபஜ்ர் தொழுகை', 'prayer', '🕌'),
-  p('kahf', h(5, 30), h(7, 30), "Surah Al-Kahf + Jumu'ah Recitation", 'سورة الكهف + قراءة الجمعة', 'ஸூரத்துல் கஹ்ஃப் + ஜும்ஆ ஓதல்', 'holiday', '🕌', {
+  p('wake', h(3, 45), h(4, 50), 'Wake Up', 'الاستيقاظ', 'விழிப்பு', 'wake', 'moon-outline'),
+  p('tea1', h(4, 50), h(5, 5), 'Tea Break', 'استراحة الشاي', 'தேநீர் இடைவேளை', 'break', 'cafe-outline'),
+  p('fajr', h(5, 5), h(5, 30), 'Fajr Prayer', 'صلاة الفجر', 'ஃபஜ்ர் தொழுகை', 'prayer', 'moon-outline'),
+  p('kahf', h(5, 30), h(7, 30), "Surah Al-Kahf + Jumu'ah Recitation", 'سورة الكهف + قراءة الجمعة', 'ஸூரத்துல் கஹ்ஃப் + ஜும்ஆ ஓதல்', 'holiday', 'moon-outline', {
     note: 'Full day off — no lessons',
   }),
-  p('friday_off_am', h(7, 30), h(12, 30), 'Jumu\'ah Holiday — No Lessons', 'عطلة الجمعة — لا دروس', 'ஜும்ஆ விடுமுறை — பாடம் இல்லை', 'holiday', '🕌'),
-  p('lunch_jumuah', h(12, 30), h(14, 0), 'Lunch + Jumu\'ah Prayer', 'الغداء + صلاة الجمعة', 'மதிய உணவு + ஜும்ஆ தொழுகை', 'prayer', '🕌'),
-  p('friday_off_pm', h(14, 0), h(17, 45), 'Holiday — Free Time', 'عطلة — وقت حر', 'விடுமுறை — ஓய்வு நேரம்', 'holiday', '🕌'),
-  p('asar', h(17, 45), MAGHRIB_NOMINAL, 'Asar + Evening Break', 'العصر + الاستراحة', 'அஸர் + மாலை இடைவேளை', 'prayer', '🕌'),
-  p('maghrib_lesson', MAGHRIB_NOMINAL, h(19, 45), 'Maghrib + Lesson', 'المغرب + الدرس', 'மக்ரிப் + பாடம்', 'class', '🕌', { isLesson: true }),
+  p('friday_off_am', h(7, 30), h(12, 30), 'Jumu\'ah Holiday — No Lessons', 'عطلة الجمعة — لا دروس', 'ஜும்ஆ விடுமுறை — பாடம் இல்லை', 'holiday', 'moon-outline'),
+  p('lunch_jumuah', h(12, 30), h(14, 0), 'Lunch + Jumu\'ah Prayer', 'الغداء + صلاة الجمعة', 'மதிய உணவு + ஜும்ஆ தொழுகை', 'prayer', 'moon-outline'),
+  p('friday_off_pm', h(14, 0), h(17, 45), 'Holiday — Free Time', 'عطلة — وقت حر', 'விடுமுறை — ஓய்வு நேரம்', 'holiday', 'moon-outline'),
+  p('asar', h(17, 45), MAGHRIB_NOMINAL, 'Asar + Evening Break', 'العصر + الاستراحة', 'அஸர் + மாலை இடைவேளை', 'prayer', 'moon-outline'),
+  p('maghrib_lesson', MAGHRIB_NOMINAL, h(19, 45), 'Maghrib + Lesson', 'المغرب + الدرس', 'மக்ரிப் + பாடம்', 'class', 'moon-outline', { isLesson: true }),
   ...eveningPeriods(),
 ];
 
 const SATURDAY: Period[] = [
-  p('wake', h(3, 45), h(4, 50), 'Wake Up', 'الاستيقاظ', 'விழிப்பு', 'wake', '🌙'),
-  p('tea1', h(4, 50), h(5, 5), 'Tea Break', 'استراحة الشاي', 'தேநீர் இடைவேளை', 'break', '☕'),
-  p('fajr', h(5, 5), h(5, 30), 'Fajr Prayer', 'صلاة الفجر', 'ஃபஜ்ர் தொழுகை', 'prayer', '🕌'),
-  p('sat_morning_off', h(5, 30), h(11, 30), 'Half Day — Morning Off', 'نصف يوم — الصباح عطلة', 'அரை நாள் — காலை விடுமுறை', 'holiday', '🌗', {
+  p('wake', h(3, 45), h(4, 50), 'Wake Up', 'الاستيقاظ', 'விழிப்பு', 'wake', 'moon-outline'),
+  p('tea1', h(4, 50), h(5, 5), 'Tea Break', 'استراحة الشاي', 'தேநீர் இடைவேளை', 'break', 'cafe-outline'),
+  p('fajr', h(5, 5), h(5, 30), 'Fajr Prayer', 'صلاة الفجر', 'ஃபஜ்ர் தொழுகை', 'prayer', 'moon-outline'),
+  p('sat_morning_off', h(5, 30), h(11, 30), 'Half Day — Morning Off', 'نصف يوم — الصباح عطلة', 'அரை நாள் — காலை விடுமுறை', 'holiday', 'hourglass-outline', {
     note: 'Lessons start at 11:30 AM',
   }),
-  p('sat_class_am', h(11, 30), h(12, 30), 'Class Time', 'وقت الدرس', 'வகுப்பு நேரம்', 'class', '☀️', { isLesson: true }),
-  p('lunch_zuhr', h(12, 30), h(13, 25), 'Lunch + Zuhr', 'الغداء + الظهر', 'மதிய உணவு + லுஹர்', 'prayer', '🍛'),
-  p('sat_class_pm', h(13, 25), h(15, 45), 'Class Time', 'وقت الدرس', 'வகுப்பு நேரம்', 'class', '☀️', {
+  p('sat_class_am', h(11, 30), h(12, 30), 'Class Time', 'وقت الدرس', 'வகுப்பு நேரம்', 'class', 'sunny-outline', { isLesson: true }),
+  p('lunch_zuhr', h(12, 30), h(13, 25), 'Lunch + Zuhr', 'الغداء + الظهر', 'மதிய உணவு + லுஹர்', 'prayer', 'restaurant-outline'),
+  p('sat_class_pm', h(13, 25), h(15, 45), 'Class Time', 'وقت الدرس', 'வகுப்பு நேரம்', 'class', 'sunny-outline', {
     isLesson: true,
     note: 'No school section on Saturday',
   }),
-  p('asar', h(15, 45), h(16, 45), 'Asar + Evening Break', 'العصر + الاستراحة', 'அஸர் + மாலை இடைவேளை', 'prayer', '🕌'),
-  p('nazira', h(16, 45), MAGHRIB_NOMINAL, 'An-Nazira / Mashk', 'الناظرة / المشق', 'நழிரா / மஷ்க்', 'nazira', '📖'),
-  p('maghrib_lesson', MAGHRIB_NOMINAL, h(19, 45), 'Maghrib + Lesson', 'المغرب + الدرس', 'மக்ரிப் + பாடம்', 'class', '🕌', { isLesson: true }),
+  p('asar', h(15, 45), h(16, 45), 'Asar + Evening Break', 'العصر + الاستراحة', 'அஸர் + மாலை இடைவேளை', 'prayer', 'moon-outline'),
+  p('nazira', h(16, 45), MAGHRIB_NOMINAL, 'An-Nazira / Mashk', 'الناظرة / المشق', 'நழிரா / மஷ்க்', 'nazira', 'book-outline'),
+  p('maghrib_lesson', MAGHRIB_NOMINAL, h(19, 45), 'Maghrib + Lesson', 'المغرب + الدرس', 'மக்ரிப் + பாடம்', 'class', 'moon-outline', { isLesson: true }),
   ...eveningPeriods(),
 ];
 
@@ -255,7 +255,7 @@ export function dayTypeBanner(date: Date = new Date()): { icon: string; en: stri
   const t = getDayType(date);
   if (t === 'friday') {
     return {
-      icon: '🕌',
+      icon: 'moon-outline',
       en: "Jumu'ah — Surah Al-Kahf recitation day. No lessons today.",
       ar: 'الجمعة — يوم قراءة سورة الكهف. لا دروس اليوم.',
       ta: "ஜும்ஆ — ஸூரத்துல் கஹ்ஃப் ஓதும் நாள். இன்று பாடம் இல்லை.",
@@ -263,7 +263,7 @@ export function dayTypeBanner(date: Date = new Date()): { icon: string; en: stri
   }
   if (t === 'saturday') {
     return {
-      icon: '🌗',
+      icon: 'hourglass-outline',
       en: 'Saturday half day — lessons from 11:30 AM, no school section.',
       ar: 'السبت نصف يوم — الدروس من ١١:٣٠ صباحاً، لا قسم مدرسي.',
       ta: 'சனிக்கிழமை அரை நாள் — 11:30 முதல் பாடங்கள், பள்ளிப் பிரிவு இல்லை.',

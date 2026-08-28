@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DataSource } from '@/data/datasource';
-import { DIVISION_NAMES } from '@/data/types';
 import { calculateQuranProgress } from '@/lib/score';
 import { Card } from '@/components/Card';
 import { GradientHeader } from '@/components/GradientHeader';
@@ -26,18 +25,23 @@ export default function StudentScreen() {
     queryFn: () => DataSource.getMonthStats(String(id)),
     enabled: !!id,
   });
+  const classQuery = useQuery({
+    queryKey: ['class', studentQuery.data?.class_id],
+    queryFn: () => DataSource.getClass(String(studentQuery.data?.class_id)),
+    enabled: !!studentQuery.data?.class_id,
+  });
 
   const s = studentQuery.data;
   if (!s) return <View style={styles.screen} />;
 
   const progress = calculateQuranProgress(s.current_page);
-  const klass = DataSource.getClass(s.class_id);
+  const klass = classQuery.data;
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: insets.bottom + Spacing.xl }}>
       <GradientHeader
         title={s.full_name}
-        subtitle={`${s.admission_no} · ${klass?.name ?? '—'} · ${DIVISION_NAMES[s.division_id]}`}
+        subtitle={klass?.name ?? ''}
         onBack={router.back}
         style={{ paddingTop: insets.top + Spacing.sm }}
       >

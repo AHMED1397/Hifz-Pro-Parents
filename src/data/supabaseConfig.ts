@@ -1,20 +1,27 @@
 // Supabase connection config for the Parent app.
 //
-// Unlike the Teacher app — which hard-codes a publishable key so it runs with
-// zero setup — the Parent app reads credentials ONLY from the environment.
-// Parent-facing apps must never ship a key that can read other families' rows;
-// the key is only as safe as the RLS policies, and the shared project is still
-// on the legacy permissive policies (see docs/PARENT_APP_PLAN.md gap G4).
+// Same pattern as the Teacher app: defaults are built in so the app connects
+// with NO .env setup, and `.env.local` overrides them when present.
 //
-// Create `.env` in the project root:
 //   EXPO_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
-//   EXPO_PUBLIC_SUPABASE_KEY=sb_publishable_...      (or ..._ANON_KEY)
+//   EXPO_PUBLIC_SUPABASE_KEY=sb_publishable_...
 //
-// With no keys, HAS_SUPABASE is false and the app runs on src/data/mock.ts.
+// ⚠️ SECURITY: this publishable key can read every row, because the shared
+// project still runs the legacy permissive policies from
+// `supabase/setup_schema.sql` (`create policy p_all ... using (true)`) and has
+// no Supabase Auth. That is acceptable for a single trusted madrasa, but it
+// means the parent's child list is filtered CLIENT-SIDE by guardian phone, not
+// enforced by the database. See docs/PARENT_APP_PLAN.md gap G4 for the
+// migration to real `auth.uid()` RLS.
 
-export const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
+const DEFAULT_SUPABASE_URL = 'https://uakfztuuncatxmlyhpst.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_p-5cnDS1MzjEnTwgDzilKQ_eIReb4WX';
+
+export const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
 
 export const SUPABASE_KEY =
-  process.env.EXPO_PUBLIC_SUPABASE_KEY ?? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
+  process.env.EXPO_PUBLIC_SUPABASE_KEY ||
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+  DEFAULT_SUPABASE_KEY;
 
 export const HAS_SUPABASE = !!(SUPABASE_URL && SUPABASE_KEY);

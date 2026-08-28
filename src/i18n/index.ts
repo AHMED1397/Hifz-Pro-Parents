@@ -14,10 +14,28 @@ export type AppLang = 'en' | 'ar' | 'ta';
  * dictionaries never loaded despite being shipped. All three are merged here,
  * with the parent-only copy layered on top of the shared teacher dictionary.
  */
+/**
+ * Deep-merge the parent copy over the shared dictionary. A shallow spread would
+ * let a parent `common` block replace the teacher app's whole `common` object,
+ * silently dropping keys like `common.done`.
+ */
+type Dict = Record<string, unknown>;
+function deepMerge(base: Dict, over: Dict): Dict {
+  const out: Dict = { ...base };
+  for (const [k, v] of Object.entries(over)) {
+    const prev = out[k];
+    out[k] =
+      v && typeof v === 'object' && !Array.isArray(v) && prev && typeof prev === 'object' && !Array.isArray(prev)
+        ? deepMerge(prev as Dict, v as Dict)
+        : v;
+  }
+  return out;
+}
+
 const resources = {
-  en: { translation: { ...en, ...parentStrings.en } },
-  ar: { translation: { ...ar, ...parentStrings.ar } },
-  ta: { translation: { ...ta, ...parentStrings.ta } },
+  en: { translation: deepMerge(en as Dict, parentStrings.en as Dict) },
+  ar: { translation: deepMerge(ar as Dict, parentStrings.ar as Dict) },
+  ta: { translation: deepMerge(ta as Dict, parentStrings.ta as Dict) },
 };
 
 export const LANG_LABELS: Record<AppLang, string> = {

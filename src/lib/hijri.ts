@@ -76,6 +76,14 @@ export function formatGregorianDate(date: Date = new Date(), locale: string = 'e
   }
 }
 
+/** Compact "12 Mar" label for chart axes. */
+export function formatDateShort(iso: string, _locale = 'en'): string {
+  const d = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return iso.slice(5);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
+
 export function getTodayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }

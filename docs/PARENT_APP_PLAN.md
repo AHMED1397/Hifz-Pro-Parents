@@ -69,6 +69,7 @@ These are the things the spec claims that **do not hold**, and how the plan hand
 | **G8** | §7: `QuranPageReader.tsx` is "the Quran page rendering component with multi-colored highlights and Hazrat margin annotation pills" | It is a **range selector**, not a viewer: its props are `{visible, onClose, initialPage, onConfirm(selection)}` and it exists so a teacher can pick a portion to record. | Wrote `src/components/MushafTracker.tsx` — read-only page renderer with per-lesson highlights, margin pills, tap-to-inspect, and page/Juz/Surah jump — on the same `mushaf.ts` data layer. The two teacher-entry components (`QuranPageReader`, `SurahPickerSheet`) were **not** carried over. |
 | **G9** | — (not mentioned in the spec) | `mushaf.ts` probes **`assets/quran_uthmani15_pages.json` first**, then IndoPak. The parent app ships one script only, and a static `require` of a file missing from the bundle is a **Metro build error**, not a catchable runtime one. | Reduced `loadFile()` to the IndoPak asset only; the lazy `require` is kept so the 1.85 MB JSON never parses at startup. |
 | **G10** | §3 Screen 4: "30-Day Activity Heatmap Grid" | No usable React Native heatmap library exists for this stack. All three npm candidates were installed and inspected: **`react-native-calendar-heatmap`** throws `ReferenceError: getValueCache is not defined` on first render (proved by executing its unmodified source with the UI layer stubbed) and relies on `defaultProps` on a function component, which React 19 removed; **`react-native-heatmap`** pins `react-native-svg ^6.3.1` against this app's 15.15.4; **`react-native-heatmap-chart`** peer-depends on `react-native ^0.41.2`. `react-native-gifted-charts@1.4.78` — the obvious choice, and already used by the Teacher app — has **no HeatMap** at all (its charts are Bar/Bubble/CandleStick/Line/Pie/PiePro/PopulationPyramid/Radar). The well-known heatmaps (`react-calendar-heatmap`, `heatmap-calendar-react`, `shadcn-heatmap`) are web-only: they need CSS classes and the DOM. | Built `src/components/ActivityHeatmap.tsx` on `react-native-svg` (already a dependency — and what those libraries render with anyway). Pure calendar logic lives in `src/lib/heatmap.ts` so it is covered by `npm run smoke`. |
+| **G11** | Screen 1: sign in as a parent | The deployed schema has **no Supabase Auth and no `parents` table**, so there is nothing to authenticate against. The only parent→child link that exists in the live data is **`students.guardian_phone`**. | Guardian-phone sign-in: the number is persisted and children are resolved by matching its **last 9 digits** (`fetchChildrenByGuardianPhone`). This is identification, **not** authentication — anyone with the number sees that family. Real scoping still needs the Phase 0 migration (G4). |
 
 ### 0.4 The real timetable (recovered — feeds G1)
 
@@ -181,8 +182,8 @@ Scaffolded, type-checked, and executed.
 | Check | Command | Result |
 |---|---|---|
 | Types | `npm run typecheck` (`tsc --noEmit`) | **exit 0**, no errors |
-| Domain logic | `npm run smoke` (`tsx scripts/smoke-check.cts`) | **61/61 assertions pass** |
-| Metro bundle (web) | `npx expo start --web` | **Web Bundled 23265ms — `expo-router/entry.js` (1723 modules)**, no unresolved modules |
+| Domain logic | `npm run smoke` (`tsx scripts/smoke-check.cts`) | **64/64 assertions pass** |
+| Metro bundle (web) | `npx expo start --web` | **`expo-router/entry.js` (1785 modules)**, no unresolved modules |
 
 The smoke check **imports and runs the shipped modules**, not copies:
 
@@ -224,10 +225,11 @@ migration and an Expo build, which cannot be done from here.
 
 | Spec says | Built as | Why |
 |---|---|---|
-| §6 tab bar: "Home, **Mushaf**, History, Exams, More" | Mushaf is a **fullscreen modal** (`app/mushaf.tsx`) opened from the dashboard launcher; tabs are Home · History · Exams · Announcements · More | The spec's own file map puts `mushaf.tsx` at the router root, and Screen 3 is specified as fullscreen with a close button. Both can't hold; the file map + Screen 3 won. |
+| §6 tab bar: "Home, **Mushaf**, History, Exams, More" | Mushaf is a **fullscreen modal** (`app/mushaf.tsx`) opened from the dashboard launcher; tabs are Home · History · **Analytics** · Exams · More | The spec's own file map puts `mushaf.tsx` at the router root, and Screen 3 is specified as fullscreen with a close button. Both can't hold; the file map + Screen 3 won. |
 | §3 Screen 1: Phone OTP "recommended" | Password sign-in is the default; OTP sits behind a second tab | SMS OTP needs a paid provider on Supabase Auth (G5). |
 | §7: reuse `QuranPageReader` | Wrote `MushafTracker` | G8 — the reused component is a selector. |
-| `CONNECT_SUPABASE.md`: key hard-coded in the client so it runs with no setup | Parent app reads credentials **only** from `.env` | A parent-facing app must not ship a key whose only protection is RLS on a project that is still on permissive policies (G4). |
+| `CONNECT_SUPABASE.md`: key hard-coded in the client so it runs with no setup | **Same as the Teacher app**: `supabaseConfig.ts` carries the project URL + publishable key as built-in defaults, overridable by `EXPO_PUBLIC_SUPABASE_*` in `.env.local` | Requested so the app runs with no setup. It is a *publishable* key and RLS on the shared project is fully permissive (`using (true)` on all 12 tables), so it grants read access to every row — child scoping is client-side only (G11). Tightening this needs the Phase 0 migration (G4). |
+| §3 Screen 5: Announcements tab | Replaced by a **notification centre** (`app/notifications.tsx`) behind the bell icon on Home | Requested. There is no `notifications` table on the deployed project, so the feed is derived from lesson entries, attendance, hold state, published exam results and madrasa announcements. |
 
 ## 6. Risks
 
@@ -238,3 +240,66 @@ migration and an Expo build, which cannot be done from here.
 | 1.85 MB mushaf asset in git | Repo bloat | Required runtime asset; Uthmani variant excluded |
 | Free-tier 7-day auto-pause | Slow first open | Acceptable; Pro plan ($25/mo) removes it |
 | `notifications` table growth | Free-tier 500 MB | 30-day outbox purge job (per `DB_AND_NOTIFICATIONS.md`) |
+
+---
+
+## 7. Round 2 — live Supabase, analytics, notification centre
+
+### 7.1 Supabase is now wired to the deployed project
+
+`src/data/supabase.ts` was rewritten against the schema that is **actually
+deployed** (`/tmp/teacher/supabase/setup_schema.sql` → the live `uakfztuuncatxmlyhpst`
+project), not the aspirational `supabase/schema.sql` in this repo. The first
+draft targeted the latter and was wrong on nearly every table: uuid PKs, a
+`parents`/`parent_students` pair, `exam_results.total_marks`, `exams.status`,
+`students.current_juz` / `division_id` / `hold_active`. None of those exist.
+
+| Live table | What the parent app reads |
+|---|---|
+| `students` (`admission_no` PK, `legacy_id` = `s1`…`s336`) | children, matched on `guardian_phone` (last 9 digits) |
+| `daily_entries` (FK → `legacy_id`) | the three daily lessons, mistakes/forgets, Nazira, hold derivation |
+| `attendance` | present / absent / leave / late |
+| `exams` + `exam_results` + `exam_examiners` → `teachers` | transcripts, **filtered to `published = true`** |
+| `announcements` | madrasa notices (`created_at` mapped to `published_at`; teacher-only rows dropped) |
+| `classes`, `class_teachers`, `teachers` | the class teacher's name on Home |
+
+Derived, because the live columns do not exist: `current_juz` (from
+`getPageInfo(current_page).juz[0]`), `division_id` (fixed `1`), and `hold_active`
+— the hold state is **computed from the ledger** exactly as the Teacher app does
+it, rather than read from a column.
+
+**Not verified:** no outbound network path to `supabase.co` exists from the
+build sandbox (`curl` → `SSL_ERROR_SYSCALL`, node `fetch` → `fetch failed`), so
+every live query above is written against the DDL, not against a live response.
+First launch in the browser/device is the first real test.
+
+### 7.2 Screens changed
+
+- **Home** — rebuilt in the Teacher app's visual language: `LinearGradient` hero
+  with `Gradients.primary` + `Shadows.brand`, a glass card holding the **class
+  teacher** and today's Gregorian/Hijri dates, a page/juz pill, and a bell
+  top-right. Removed: the offline/live badge, the admission number, the
+  floor/class/division/faculty line, and the unlabelled progress ring (it was
+  `current_page / 604`; the same figure now appears **labelled** as "Quran
+  progress" on Analytics).
+- **Analytics** (new tab) — `BarChart` / `LineChart` / `PieChart` from
+  `react-native-gifted-charts`: juz recited per week, furthest page reached over
+  time, and the new-lesson vs revision mix; plus a Quran-progress bar, an
+  attendance breakdown, the full student record, and recent transcripts.
+- **Notifications** (new route) — the bell's target. Derived feed, grouped by
+  day, filtered All / Lessons / Madrasa.
+- **History** — the inline day-number grid is replaced by the SVG
+  `ActivityHeatmap` (G10); tapping a cell filters the lesson feed to that day.
+- **Sign-in** — guardian phone number (G11) with a demo-family fallback.
+- **Tabs** — Home · History · Analytics · Exams · More. Announcements deleted.
+- **Emoji removed from all UI copy.** Icons now come from `@expo/vector-icons`
+  (Ionicons), including the timetable's period icons, which changed from emoji
+  strings to icon names — `LiveScheduleCard` renders them as `<Ionicons>`.
+
+### 7.3 i18n
+
+`src/i18n/index.ts` now **deep-merges** the parent copy over the shared Teacher
+dictionary. A shallow spread would let a parent `common` block replace the
+Teacher app's entire `common` object and silently drop keys such as
+`common.done`. All 150 keys used in the app resolve in `en`, `ar` and `ta`,
+checked by script rather than by eye.

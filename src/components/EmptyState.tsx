@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/theme/tokens';
 
 interface EmptyStateProps {
@@ -13,7 +14,7 @@ interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  icon = '📭',
+  icon = 'mail-open-outline',
   titleKey,
   messageKey,
   actionLabelKey,
@@ -25,7 +26,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <View style={[styles.container, style]}>
       <View style={styles.iconWrap}>
-        <Text style={styles.icon} aria-hidden={true}>{icon}</Text>
+        <Ionicons name={icon as never} size={40} color={Colors.primary} />
       </View>
       <Text style={styles.title}>{t(titleKey)}</Text>
       {messageKey && <Text style={styles.message}>{t(messageKey)}</Text>}
@@ -53,9 +54,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryWash,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 44,
   },
   title: {
     fontSize: 18,

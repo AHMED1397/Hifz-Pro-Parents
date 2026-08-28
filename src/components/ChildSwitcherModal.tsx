@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, Pressable, Modal, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
-import { DIVISION_NAMES } from '@/data/types';
 import type { Student } from '@/data/types';
 import { Colors, BorderRadius, Spacing } from '@/theme/tokens';
 
@@ -40,11 +40,10 @@ export function ChildSwitcherModal({ visible, onClose, children: kids, activeId,
                 <View style={styles.meta}>
                   <Text style={styles.name}>{kid.full_name}</Text>
                   <Text style={styles.sub}>
-                    {kid.admission_no} · {DIVISION_NAMES[kid.division_id]} · {t('parent.current')}: P.
-                    {kid.current_page}
+                    {t('parent.page')} {kid.current_page}
                   </Text>
                 </View>
-                {active ? <Text style={styles.tick}>✓</Text> : null}
+                {active ? <Ionicons name="checkmark-circle" size={20} color={Colors.primary} /> : null}
               </Pressable>
             );
           })}
@@ -86,7 +85,6 @@ const styles = StyleSheet.create({
   meta: { flex: 1 },
   name: { fontSize: 15, fontWeight: '700', color: Colors.text },
   sub: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
-  tick: { color: Colors.primary, fontSize: 18, fontWeight: '800' },
 });
 
 export default ChildSwitcherModal;

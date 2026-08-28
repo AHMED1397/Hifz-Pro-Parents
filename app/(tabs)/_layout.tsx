@@ -45,20 +45,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="analytics"
+        options={{
+          title: t('parent.tabAnalytics'),
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? 'stats-chart' : 'stats-chart-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="exams"
         options={{
           title: t('parent.tabExams'),
           tabBarIcon: ({ focused, color }) => (
             <Ionicons name={focused ? 'trophy' : 'trophy-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="announcements"
-        options={{
-          title: t('parent.announcements'),
-          tabBarIcon: ({ focused, color }) => (
-            <Ionicons name={focused ? 'megaphone' : 'megaphone-outline'} size={24} color={color} />
           ),
         }}
       />

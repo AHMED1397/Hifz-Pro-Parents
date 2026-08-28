@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
 import { formatGregorianDate } from '@/lib/hijri';
 import { getGradeFromTotal } from '@/lib/score';
@@ -37,7 +38,10 @@ export function ExamResultCard({ result }: Props) {
       <Text style={styles.title}>{result.exam_name ?? t('parent.examTranscripts')}</Text>
 
       <View style={styles.subRow}>
-        <Text style={styles.sub}>👳 {t('parent.examiner')}: {result.examiner_name ?? '—'}</Text>
+        <View style={styles.subInline}>
+          <Ionicons name="person-outline" size={12} color={Colors.textMuted} />
+          <Text style={styles.sub}>{t('parent.examiner')}: {result.examiner_name ?? '—'}</Text>
+        </View>
         <Text style={styles.sub}>{formatGregorianDate(new Date(result.exam_date), 'en')}</Text>
       </View>
 
@@ -94,6 +98,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   title: { fontSize: 15, fontWeight: '800', color: Colors.text },
+  subInline: { flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 },
   subRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
   sub: { fontSize: 12, color: Colors.textSecondary },
   section: { fontSize: 12, fontWeight: '800', color: Colors.textSecondary, marginTop: Spacing.md, marginBottom: 6 },

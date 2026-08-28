@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, StyleSheet, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -112,7 +113,7 @@ export function MushafTracker({ entries, initialPage, teacherNameFor, onInspect 
     <View style={[styles.wrap, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>📖 {t('parent.quranTracker')}</Text>
+        <Text style={styles.headerTitle}>{t('parent.quranTracker')}</Text>
         <Text style={styles.headerSub}>
           {t('parent.current')}: {t('parent.page')} {page} ({t('parent.juz')} {info.juz.join(', ')}) ·{' '}
           {t('parent.totalProgress')} {initialPage}/{MUSHAF_PAGES}
@@ -158,7 +159,7 @@ export function MushafTracker({ entries, initialPage, teacherNameFor, onInspect 
                 {pill ? (
                   <View style={styles.pill}>
                     <Text style={styles.pillText} numberOfLines={1}>
-                      📅 {shortDate(pill.entry.entry_date)} · {teacherNameFor(pill.entry.teacher_id)}
+                      {shortDate(pill.entry.entry_date)} · {teacherNameFor(pill.entry.teacher_id)}
                     </Text>
                   </View>
                 ) : null}
@@ -173,15 +174,16 @@ export function MushafTracker({ entries, initialPage, teacherNameFor, onInspect 
       {/* Navigation */}
       <View style={styles.nav}>
         <Pressable style={styles.navBtn} onPress={() => go(-1)} disabled={page <= 1}>
-          <Text style={styles.navText}>◀</Text>
+          <Ionicons name="chevron-back" size={18} color="#fff" />
         </Pressable>
         <Pressable onPress={() => setJumpOpen(true)} style={styles.jumpBtn}>
           <Text style={styles.jumpText}>
-            {t('parent.page')} {page} / {MUSHAF_PAGES} · {t('parent.jumpTo')} ▾
+            {t('parent.page')} {page} / {MUSHAF_PAGES} · {t('parent.jumpTo')}
           </Text>
+          <Ionicons name="chevron-down" size={14} color="rgba(255,255,255,0.9)" />
         </Pressable>
         <Pressable style={styles.navBtn} onPress={() => go(1)} disabled={page >= MUSHAF_PAGES}>
-          <Text style={styles.navText}>▶</Text>
+          <Ionicons name="chevron-forward" size={18} color="#fff" />
         </Pressable>
       </View>
 
@@ -298,8 +300,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  navText: { fontSize: 16, color: Colors.text },
-  jumpBtn: { flex: 1, height: 40, borderRadius: BorderRadius.md, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
+  jumpBtn: { flex: 1, height: 40, borderRadius: BorderRadius.md, backgroundColor: Colors.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
   jumpText: { color: '#fff', fontSize: 12, fontWeight: '800' },
   backdrop: { flex: 1, backgroundColor: 'rgba(14,27,51,0.45)', justifyContent: 'flex-end' },
   jumpSheet: { backgroundColor: Colors.card, borderTopLeftRadius: BorderRadius.xl, borderTopRightRadius: BorderRadius.xl, padding: Spacing.lg, maxHeight: '80%' },

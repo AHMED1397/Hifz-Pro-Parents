@@ -116,3 +116,19 @@ export function toWeeks(days: HeatmapDay[]): Array<Array<HeatmapDay | null>> {
   }
   return weeks;
 }
+
+/**
+ * Headline counts across the range — used by the History header.
+ * `activeDays` counts days with at least one recorded lesson.
+ */
+export function heatmapTotals(days: HeatmapDay[]) {
+  return days.reduce(
+    (acc, d) => ({
+      lessons: acc.lessons + d.total,
+      passed: acc.passed + d.passed,
+      failed: acc.failed + (d.total - d.passed),
+      activeDays: acc.activeDays + (d.total > 0 ? 1 : 0),
+    }),
+    { lessons: 0, passed: 0, failed: 0, activeDays: 0 }
+  );
+}

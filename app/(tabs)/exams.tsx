@@ -38,7 +38,7 @@ export default function ExamsScreen() {
       showsVerticalScrollIndicator={false}
     >
       <LinearGradient colors={['#2E6BF0', '#1544B0']} style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <Text style={styles.headerTitle}>🏆 {t('parent.examTranscripts')}</Text>
+        <Text style={styles.headerTitle}>{t('parent.examTranscripts')}</Text>
         <Text style={styles.headerSub}>
           {activeChild?.full_name ?? ''} · {results.length} {t('parent.examTranscripts')}
         </Text>
@@ -60,7 +60,7 @@ export default function ExamsScreen() {
         {resultsQuery.isLoading ? <ActivityIndicator color={Colors.primary} /> : null}
 
         {!resultsQuery.isLoading && results.length === 0 ? (
-          <EmptyState icon="🏆" titleKey="parent.noResultsYet" />
+          <EmptyState icon="trophy-outline" titleKey="parent.noResultsYet" />
         ) : null}
 
         {results.map(r => (

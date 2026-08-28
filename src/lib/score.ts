@@ -167,11 +167,11 @@ export function getSmartContinueSuggestion(
 
 export function getDaysBehindBadge(daysBehind: number): { text: string; color: 'green' | 'gold' | 'red' } {
   if (daysBehind <= 0) {
-    return { text: '✓ on track', color: 'green' };
+    return { text: 'on track', color: 'green' };
   } else if (daysBehind <= 3) {
-    return { text: `⚠ ${daysBehind} day(s) behind`, color: 'gold' };
+    return { text: `${daysBehind} day(s) behind`, color: 'gold' };
   } else {
-    return { text: `🔴 ${daysBehind} days behind`, color: 'red' };
+    return { text: `${daysBehind} days behind`, color: 'red' };
   }
 }
 

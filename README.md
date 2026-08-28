@@ -39,20 +39,23 @@ npm install
 npm start            # Expo dev server — press w for web, a for Android
 ```
 
-**No configuration needed.** Without a `.env` the app runs entirely on the demo
-family in `src/data/mock.ts` — two children, 30 days of lessons, exams and
-notices — so every screen works offline.
+**No configuration needed.** `src/data/supabaseConfig.ts` carries the deployed
+project's URL and publishable key as built-in defaults, so the app reads live
+data as soon as it starts — the same pattern the Teacher app uses. Set
+`EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_KEY` in `.env.local`
+(gitignored) to point somewhere else; clear both to fall back to the demo family
+in `src/data/mock.ts`.
 
-To point at Supabase, copy [`.env.example`](./.env.example) to `.env` and fill in
-the URL + key. ⚠️ The project must be on the **UUID schema**
-(`supabase/schema.sql`) with `parent_students` populated — not the legacy
-`setup_schema.sql` the Teacher app currently uses. See gap **G4**.
+Children are matched to a guardian by `students.guardian_phone` (last 9 digits).
+⚠️ The deployed project has **no Supabase Auth and fully permissive RLS**, so
+that match identifies a family — it does not authenticate one. Real scoping needs
+the Phase 0 migration; see gaps **G4** and **G11**.
 
 ### Checks
 
 ```bash
 npm run typecheck    # tsc --noEmit
-npm run smoke        # executes the domain logic — 61 assertions
+npm run smoke        # executes the domain logic — 64 assertions
 ```
 
 `npm run smoke` runs the real modules under Node (not re-implementations):
@@ -67,15 +70,16 @@ heatmap calendar's week-column alignment.
 ```
 app/
 ├── index.tsx                    entry gate (session check, or straight to demo)
-├── (auth)/login.tsx             Screen 1 — password + SMS OTP sign-in
+├── (auth)/login.tsx             Screen 1 — guardian mobile number sign-in
 ├── (tabs)/
-│   ├── index.tsx                Screen 2 — dashboard: child switcher, live
-│   │                            timetable, 3 lesson cards, hold banner,
-│   │                            attendance badge, Mushaf launcher, stats
-│   ├── history.tsx              Screen 4 — 30-day heatmap, lesson feed, attendance
+│   ├── index.tsx                Screen 2 — dashboard: child switcher, class
+│   │                            teacher, live timetable, 3 lesson cards, hold
+│   │                            banner, Mushaf launcher, stats
+│   ├── history.tsx              Screen 4 — activity heatmap, lesson feed, attendance
+│   ├── analytics.tsx            Screen 6 — bar/line/pie charts + full child record
 │   ├── exams.tsx                Screen 5 — 100-mark transcripts
-│   ├── announcements.tsx        Screen 6 — notices
-│   └── settings.tsx             Screen 7 — family, language, push prefs
+│   └── settings.tsx             Screen 7 — family, guardian number, language, push
+├── notifications.tsx            notification centre (the bell on Home)
 ├── mushaf.tsx                   Screen 3 — fullscreen Personal Quran Tracker
 └── student/[id].tsx             child profile
 src/
@@ -114,11 +118,16 @@ the parent data layer (`types`, `mock`, `datasource`, `supabase`, `supabaseConfi
 The full list with evidence is in `docs/PARENT_APP_PLAN.md` §0.3. The three that
 change behaviour today:
 
-- **G4 — the backend is not parent-ready (blocking for live data).** The deployed
-  project runs the legacy short-id schema with permissive RLS and no Supabase
-  Auth, so it has no `parents` / `parent_students` tables. Until it is migrated
-  to `supabase/schema.sql`, the app runs on demo data.
-- **G5 — SMS OTP needs a paid SMS provider**, so password sign-in is the default path.
+- **G4 — the backend is not parent-ready.** The deployed project runs the legacy
+  short-id schema with permissive RLS and no Supabase Auth, so it has no
+  `parents` / `parent_students` tables. Live reads work, but every row is
+  readable by anyone holding the publishable key.
+- **G11 — parent scoping is by `guardian_phone`, which identifies but does not
+  authenticate.** Anyone who knows the number sees that family.
+- **G5 — SMS OTP needs a paid SMS provider**, so the guardian number is entered
+  directly rather than verified with a code.
+- **G10 — no maintained React heatmap library renders in React Native**, so the
+  activity grid is `src/lib/heatmap.ts` + `src/components/ActivityHeatmap.tsx`.
 - **G8 — `QuranPageReader.tsx` is a teacher range-selector, not a viewer.** The
   read-only annotated tracker is `src/components/MushafTracker.tsx`.
 - **G10 — no usable React Native heatmap library.** All three npm candidates
@@ -135,10 +144,10 @@ and the Database Webhook created), PDF report cards, iOS release.
 
 ## Screens to expect on demo data
 
-- **Dashboard** — Muhammad Bilal (HFZ-2101, Floor 3 · Class 3-A), Ustadh
-  Ash-Sheikh Dilhan, current page 146 (Juz 8). Sibling **Abdullah Rahman** is on
-  hold because his Sabqi failed, which drives the amber hold banner.
+- **Dashboard** — Muhammad Bilal, class teacher Ash-Sheikh Dilhan, current page
+  146 (Juz 8). Sibling **Abdullah Rahman** is on hold because his Sabqi failed,
+  which drives the amber hold banner.
 - **Mushaf** — page 146 renders real IndoPak 15-line Arabic with Sabaq/Sabqi/Manzil
-  highlights and `📅 15 Aug · Hazrat Dilhan` margin pills.
+  highlights and `15 Aug · Hazrat Dilhan` margin pills.
 - **Exams** — 10-Juz Milestone: 6 questions + Tajweed 23/25 + Tarteel 14/15 =
   **93/100, A+, rank #1/24**, examiner Ash-Sheikh Dilhan.
