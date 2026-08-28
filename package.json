@@ -2,7 +2,7 @@
   "name": "hfz-parent",
   "version": "1.0.0",
   "main": "expo-router/entry",
-  "description": "Al Haqqaniyyah Hifz Section \u2014 Parent app (Hfz-Parent)",
+  "description": "Al Haqqaniyyah Hifz Section — Parent app (Hfz-Parent)",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

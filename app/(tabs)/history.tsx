@@ -10,24 +10,14 @@ import { getTeacherById, getSurahById } from '@/data/mock';
 import { formatGregorianDate } from '@/lib/hijri';
 import { useApp } from '@/context/AppProviders';
 import { FilterChips } from '@/components/FilterChips';
+import { ActivityHeatmap } from '@/components/ActivityHeatmap';
+import { buildHeatmapDays } from '@/lib/heatmap';
 import { LessonDetailModal } from '@/components/LessonDetailModal';
 import { LESSON_COLORS, lessonLabel } from '@/components/LessonCard';
 import { Colors, BorderRadius, Spacing } from '@/theme/tokens';
 import type { DailyEntry } from '@/data/types';
 
 type FilterValue = 'all' | 'sabaq' | 'sabqi' | 'manzil';
-
-const addDays = (base: Date, delta: number) => {
-  const d = new Date(base);
-  d.setDate(d.getDate() + delta);
-  return d;
-};
-const iso = (d: Date) => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-};
 
 /** Screen 4: 30-day activity heatmap + categorized lesson history + attendance. */
 export default function HistoryScreen() {
@@ -57,28 +47,7 @@ export default function HistoryScreen() {
 
   const entries = useMemo<DailyEntry[]>(() => entriesQuery.data ?? [], [entriesQuery.data]);
 
-  /** day → 'pass' | 'fail' | 'none' — grey cells are Fridays / no class. */
-  const heatmap = useMemo(() => {
-    const byDate = new Map<string, DailyEntry[]>();
-    for (const e of entries) {
-      const arr = byDate.get(e.entry_date) ?? [];
-      arr.push(e);
-      byDate.set(e.entry_date, arr);
-    }
-    const today = new Date();
-    return Array.from({ length: 30 }, (_, i) => {
-      const d = addDays(today, -(29 - i));
-      const key = iso(d);
-      const dayEntries = byDate.get(key) ?? [];
-      const friday = d.getDay() === 5;
-      const state: 'pass' | 'fail' | 'none' = dayEntries.length
-        ? dayEntries.every(e => e.result === 'pass')
-          ? 'pass'
-          : 'fail'
-        : 'none';
-      return { key, date: d, state, friday, count: dayEntries.length };
-    });
-  }, [entries]);
+  const heatmapDays = useMemo(() => buildHeatmapDays(entries, 30), [entries]);
 
   const filtered = useMemo(
     () => (filter === 'all' ? entries : entries.filter(e => e.entry_type === filter)),
@@ -98,26 +67,7 @@ export default function HistoryScreen() {
 
       <View style={styles.body}>
         {/* ── Heatmap ─────────────────────────────────────── */}
-        <View style={styles.grid}>
-          {heatmap.map(cell => (
-            <View
-              key={cell.key}
-              style={[
-                styles.cell,
-                cell.state === 'pass' && styles.cellPass,
-                cell.state === 'fail' && styles.cellFail,
-                cell.state === 'none' && (cell.friday ? styles.cellFriday : styles.cellNone),
-              ]}
-            >
-              <Text style={styles.cellText}>{cell.date.getDate()}</Text>
-            </View>
-          ))}
-        </View>
-        <View style={styles.legend}>
-          <Legend color={Colors.success} label={t('parent.greenAllPassed')} />
-          <Legend color={Colors.danger} label={t('parent.redNeedsRepeat')} />
-          <Legend color="#D7DEE9" label={t('parent.greyNoClass')} />
-        </View>
+        <ActivityHeatmap days={heatmapDays} />
 
         {/* ── Attendance breakdown ──────────────────────────── */}
         <Text style={styles.sectionTitle}>📅 {t('parent.attendanceBreakdown')}</Text>
@@ -177,15 +127,6 @@ export default function HistoryScreen() {
   );
 }
 
-function Legend({ color, label }: { color: string; label: string }) {
-  return (
-    <View style={styles.legendItem}>
-      <View style={[styles.legendDot, { backgroundColor: color }]} />
-      <Text style={styles.legendText}>{label}</Text>
-    </View>
-  );
-}
-
 function AttStat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <View style={[styles.attStat, { borderLeftColor: color }]}>
@@ -201,17 +142,6 @@ const styles = StyleSheet.create({
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: '900' },
   headerSub: { color: 'rgba(255,255,255,0.85)', fontSize: 12, marginTop: 2 },
   body: { padding: Spacing.md },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 5 },
-  cell: { width: '9.4%', aspectRatio: 1, borderRadius: 6, alignItems: 'center', justifyContent: 'center' },
-  cellPass: { backgroundColor: Colors.success },
-  cellFail: { backgroundColor: Colors.danger },
-  cellNone: { backgroundColor: '#E9EEF6' },
-  cellFriday: { backgroundColor: '#D7DEE9' },
-  cellText: { fontSize: 9, color: '#fff', fontWeight: '700' },
-  legend: { flexDirection: 'row', flexWrap: 'wrap', marginTop: Spacing.sm, gap: 10 },
-  legendItem: { flexDirection: 'row', alignItems: 'center' },
-  legendDot: { width: 10, height: 10, borderRadius: 3, marginRight: 5 },
-  legendText: { fontSize: 10, color: Colors.textSecondary },
   sectionTitle: { fontSize: 14, fontWeight: '900', color: Colors.text, marginTop: Spacing.lg, marginBottom: Spacing.sm },
   attRow: { flexDirection: 'row', gap: 8 },
   attStat: {

@@ -52,12 +52,13 @@ the URL + key. ⚠️ The project must be on the **UUID schema**
 
 ```bash
 npm run typecheck    # tsc --noEmit
-npm run smoke        # executes the domain logic — 44 assertions
+npm run smoke        # executes the domain logic — 61 assertions
 ```
 
 `npm run smoke` runs the real modules under Node (not re-implementations):
 the timetable engine, the Hold Rule, the mock ledger's invariants, the
-lazily-loaded 1.85 MB mushaf asset, and the shared scoring helpers.
+lazily-loaded 1.85 MB mushaf asset, the shared scoring helpers, and the
+heatmap calendar's week-column alignment.
 
 ---
 
@@ -102,6 +103,7 @@ supabase/
 ### Written new for this app
 `src/lib/timetable.ts` (the spec said to reuse it — it does not exist upstream, gap **G1**),
 `src/components/MushafTracker.tsx` (gap **G8**), `src/lib/notifications.ts` (gap **G2**),
+`src/components/ActivityHeatmap.tsx` + `src/lib/heatmap.ts` (gap **G10**),
 the parent data layer (`types`, `mock`, `datasource`, `supabase`, `supabaseConfig`),
 `AppProviders`, and all seven screens.
 
@@ -119,6 +121,11 @@ change behaviour today:
 - **G5 — SMS OTP needs a paid SMS provider**, so password sign-in is the default path.
 - **G8 — `QuranPageReader.tsx` is a teacher range-selector, not a viewer.** The
   read-only annotated tracker is `src/components/MushafTracker.tsx`.
+- **G10 — no usable React Native heatmap library.** All three npm candidates
+  were installed and inspected; the best one throws a `ReferenceError` on first
+  render and depends on `defaultProps` (removed in React 19). The history
+  heatmap is drawn with `react-native-svg` instead — see the plan for the
+  evidence.
 
 **Not built yet:** real auth gating behind Supabase Auth (Phase 6), push delivery
 end-to-end (Phase 7 — needs the Edge Function deployed, `EXPO_ACCESS_TOKEN` set,

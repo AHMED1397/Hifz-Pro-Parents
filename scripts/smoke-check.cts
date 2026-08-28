@@ -29,6 +29,7 @@ import {
 import { getMushafPage, getPageAyahs, getPageInfo, hasMushafFile, MUSHAF_PAGES } from '../src/data/mushaf';
 import { getSurahById } from '../src/data/surahs';
 import { calculateQuranProgress, getGradeFromTotal } from '../src/lib/score';
+import { buildHeatmapDays, toWeeks, fillFor, toISODate, FRIDAY_FILL } from '../src/lib/heatmap';
 
 let checks = 0;
 const ok = (label: string, cond: unknown, detail = '') => {
@@ -132,6 +133,55 @@ ok('Page 146 breaks into ayah units', (ayahs?.ayahs.length ?? 0) > 0, `${ayahs?.
 ok('Page 146 has Arabic line text', (ayahs?.lineSegments.get(1)?.[0]?.text.length ?? 0) > 5);
 ok('Mushaf covers 604 pages', MUSHAF_PAGES === 604);
 ok('Surah catalog has 114 entries', getSurahById(114).id === 114);
+
+// ── 5. Heatmap calendar (src/lib/heatmap.ts) ────────────────
+console.log('\nHeatmap calendar (src/lib/heatmap.ts)');
+
+// A fixed "today" so the assertions are deterministic: 2026-08-28 is a Friday.
+const fixedToday = new Date(2026, 7, 28, 12, 0, 0);
+const days = buildHeatmapDays(DAILY_ENTRIES, 30, fixedToday);
+
+ok('One cell per day for 30 days', days.length === 30, `${days.length} cells`);
+ok('Oldest cell first', days[0].date < days[29].date);
+ok('Last cell is today', toISODate(days[29].date) === toISODate(fixedToday));
+ok(
+  'Every Friday cell is marked friday even with entries recorded',
+  days.filter(d => d.date.getDay() === 5).every(d => d.state === 'friday')
+);
+ok('Friday cells exist in the window', days.filter(d => d.state === 'friday').length >= 4,
+  `${days.filter(d => d.state === 'friday').length} fridays`);
+ok(
+  'Teaching days with entries are never "none"',
+  days.filter(d => d.date.getDay() !== 5 && d.total > 0).every(d => d.state !== 'none')
+);
+ok(
+  'A day with mixed results is "partial", not "pass"',
+  days.filter(d => d.passed > 0 && d.passed < d.total).every(d => d.state === 'partial')
+);
+ok(
+  'A day where nothing passed is "fail"',
+  days.filter(d => d.total > 0 && d.passed === 0).every(d => d.state === 'fail')
+);
+ok('passed never exceeds total', days.every(d => d.passed <= d.total));
+
+const weeks = toWeeks(days);
+ok('Cells fold into week columns', weeks.length >= 5 && weeks.length <= 6, `${weeks.length} columns`);
+ok('Every column has exactly 7 slots', weeks.every(w => w.length === 7));
+ok(
+  'Leading blanks match the first day\'s weekday',
+  weeks[0].slice(0, days[0].date.getDay()).every(c => c === null)
+);
+ok(
+  'Every real cell sits on the row matching its weekday',
+  weeks.every(w => w.every((c, row) => c === null || c.date.getDay() === row))
+);
+ok('No cell is lost by the grouping', weeks.flat().filter(Boolean).length === 30);
+ok(
+  'Friday cells land on row 5',
+  weeks.every(w => w[5] === null || w[5]?.state === 'friday')
+);
+ok('fillFor gives Fridays the off-day colour', fillFor(days.find(d => d.state === 'friday')!) === FRIDAY_FILL);
+ok('fillFor distinguishes fail from pass', fillFor({ ...days[0], state: 'fail' }) !== fillFor({ ...days[0], state: 'pass' }));
 
 // ── 5. Shared scoring ───────────────────────────────────────
 console.log('\nShared scoring (src/lib/score.ts)');
