@@ -1,0 +1,34 @@
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# native
+ios/
+android/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+google-services.json
+
+# env — Supabase credentials must never be committed
+.env
+.env.local
+.env.*.local
+
+# metro / caches
+.metro-health-check*
+*.tsbuildinfo
+
+# misc
+.DS_Store
+npm-debug.*
+yarn-debug.*
+yarn-error.*

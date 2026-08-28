@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "Al Haqqaniyyah Hifz Parent",
+    "slug": "hfz-parent",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1E5FE0"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.haqqaniyyah.parent"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F4F7FC"
+      },
+      "package": "com.haqqaniyyah.parent"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-splash-screen",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#1E5FE0"
+        }
+      ]
+    ],
+    "scheme": "haqqaniyyah-parent",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
