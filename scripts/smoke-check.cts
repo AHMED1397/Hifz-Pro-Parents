@@ -30,6 +30,7 @@ import { getMushafPage, getPageAyahs, getPageInfo, hasMushafFile, MUSHAF_PAGES }
 import { getSurahById } from '../src/data/surahs';
 import { calculateQuranProgress, getGradeFromTotal } from '../src/lib/score';
 import { buildHeatmapDays, toWeeks, fillFor, toISODate, heatmapTotals, FRIDAY_FILL } from '../src/lib/heatmap';
+import { creditedLines, juzTargetForYear, trackForYear, violatesLinesRule } from '../src/lib/contract';
 
 let checks = 0;
 const ok = (label: string, cond: unknown, detail = '') => {
@@ -201,5 +202,48 @@ ok('Grade A+ at 93', getGradeFromTotal(93) === 'A+');
 ok('Grade A at 88', getGradeFromTotal(88) === 'A');
 ok('Grade C at 62', getGradeFromTotal(62) === 'C');
 ok('Grade D below 60', getGradeFromTotal(55) === 'D');
+
+// ── 6. Hifz Core contract (github.com/AHMED1397/Hifz-Core) ──
+console.log('\nCore contract (src/lib/contract.ts)');
+
+// CRITICAL BUSINESS RULE: nazira_done = false or result = fail ⇒ lines_count = 0.
+const violating = DAILY_ENTRIES.filter(violatesLinesRule);
+ok('No demo entry credits lines on a fail or unprepared nazira', violating.length === 0,
+  violating.length ? violating.map(e => `${e.student_id} ${e.entry_date} ${e.entry_type}`).join(', ') : `${DAILY_ENTRIES.length} rows checked`);
+ok('creditedLines() zeroes a failed entry that still carries a line range',
+  creditedLines({ result: 'fail', nazira_done: true, line_from: 1, line_to: 10, lines_count: 10 }) === 0);
+ok('creditedLines() zeroes a passed entry whose nazira was not done',
+  creditedLines({ result: 'pass', nazira_done: false, line_from: 1, line_to: 10, lines_count: 10 }) === 0);
+ok('creditedLines() prefers the lines_count column over the range',
+  creditedLines({ result: 'pass', nazira_done: true, line_from: 1, line_to: 4, lines_count: 7 }) === 7);
+ok('creditedLines() falls back to line_from..line_to on legacy rows',
+  creditedLines({ result: 'pass', nazira_done: true, line_from: 3, line_to: 9 }) === 7);
+ok('creditedLines() credits nothing for a revision slot with no lines recorded',
+  creditedLines({ result: 'pass', nazira_done: true, lines_count: 0 }) === 0);
+
+// Year 4/5 are Dawr — no new Sabaq, 1–3 juz of Manzil revision instead.
+ok('Years 1-3 are on the hifz track', [1, 2, 3].every(y => trackForYear(y) === 'hifz'));
+ok('Years 4-5 are on the dawr track', [4, 5].every(y => trackForYear(y) === 'dawr'));
+ok('Year targets follow the syllabus (1-6, 7-20, 21-30)',
+  juzTargetForYear(1) === 6 && juzTargetForYear(2) === 20 && juzTargetForYear(3) === 30);
+ok('Dawr years keep juz 30 as the target', juzTargetForYear(4) === 30 && juzTargetForYear(5) === 30);
+
+// Schema invariants the parent app reads against.
+const seen = new Set<string>();
+let dupes = 0;
+for (const e of DAILY_ENTRIES) {
+  const key = `${e.student_id}|${e.entry_date}|${e.entry_type}`;
+  if (seen.has(key)) dupes++;
+  seen.add(key);
+}
+ok('daily_entries stay unique per (student, date, type)', dupes === 0, `${seen.size} distinct rows`);
+ok('Every entry type is sabaq, sabqi or manzil',
+  DAILY_ENTRIES.every(e => e.entry_type === 'sabaq' || e.entry_type === 'sabqi' || e.entry_type === 'manzil'));
+ok('Every student page sits inside the 15-line madani mushaf (1..604)',
+  STUDENTS.every(st => (st.current_page ?? 1) >= 1 && (st.current_page ?? 1) <= 604));
+ok('Every demo student carries a track',
+  STUDENTS.every(st => st.track === 'hifz' || st.track === 'dawr' || st.track === 'nazira'));
+ok('Demo juz targets match the syllabus for each student year',
+  STUDENTS.every(st => !st.current_year || st.juz_target === juzTargetForYear(st.current_year)));
 
 console.log(`\nAll ${checks} checks passed.\n`);

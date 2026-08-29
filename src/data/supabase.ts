@@ -24,6 +24,7 @@ import { createClient } from '@supabase/supabase-js';
 
 import { HAS_SUPABASE, SUPABASE_KEY, SUPABASE_URL } from './supabaseConfig';
 import { getPageInfo } from './mushaf';
+import { juzTargetForYear, trackForYear } from '../lib/contract';
 import type {
   Announcement,
   Attendance,
@@ -50,6 +51,8 @@ export const isLive = () => !!supabase;
 
 // ── Row shapes as they exist in the live database ───────────
 interface StudentRow {
+  /** Core contract column; absent on rows written before it existed. */
+  track?: string;
   admission_no: string;
   legacy_id: string;
   full_name: string;
@@ -94,7 +97,10 @@ function toStudent(row: StudentRow): Student {
     current_juz: juz,
     current_page: page,
     current_year: row.current_year ?? undefined,
-    juz_target: row.juz_target ?? undefined,
+    // `track` is part of the Core contract; older rows may not carry it, so
+    // derive it from the academic year (Year 4/5 are Dawr).
+    track: (row.track as Student['track']) ?? trackForYear(row.current_year ?? undefined),
+    juz_target: row.juz_target ?? juzTargetForYear(row.current_year ?? undefined),
     days_behind: Number(row.days_behind ?? 0),
     hold_active: false,
     hold_reason: null,
@@ -177,6 +183,8 @@ export async function fetchEntries(studentId: string, days = 30): Promise<DailyE
     mistakes: e.mistakes ?? 0,
     forgets: e.forgets ?? 0,
     remark: e.remark ?? '',
+    // Multi-app rule: never assume a column another app owns is present.
+    lines_count: e.lines_count ?? 0,
     days_behind: Number(e.days_behind ?? 0),
   }));
 }

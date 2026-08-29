@@ -25,8 +25,10 @@ The app is built from the five documents in [`docs/`](./docs):
 | [`CONNECT_SUPABASE.md`](./docs/CONNECT_SUPABASE.md) | How the Teacher app is wired to Supabase today |
 | [`ADMIN_WEBAPP_SPEC.md`](./docs/ADMIN_WEBAPP_SPEC.md) | Admin spec — holds the **authoritative SQL schema** (18 tables) |
 | [`HAQQANIYYAH_HIFZ_STRUCTURE_FULL.md`](./docs/HAQQANIYYAH_HIFZ_STRUCTURE_FULL.md) | Authoritative source doc; §3.4 is the real daily timetable |
+| [`CORE_CONTRACT.md`](./docs/CORE_CONTRACT.md) | **The shared Hifz Core data contract** — `lines_count` rule, `track`, year targets, non-breaking column policy |
 
-**Read [`docs/PARENT_APP_PLAN.md`](./docs/PARENT_APP_PLAN.md) first.** It records what the
+**Read [`docs/CORE_CONTRACT.md`](./docs/CORE_CONTRACT.md) first, then
+[`docs/PARENT_APP_PLAN.md`](./docs/PARENT_APP_PLAN.md).** It records what the
 spec claims, what was actually found in the recovered Teacher app source, and the
 ten gaps between them.
 
@@ -55,13 +57,14 @@ the Phase 0 migration; see gaps **G4** and **G11**.
 
 ```bash
 npm run typecheck    # tsc --noEmit
-npm run smoke        # executes the domain logic — 64 assertions
+npm run smoke        # executes the domain logic — 79 assertions
+npm run check:i18n   # every t('…') resolves in en, ar and ta — 161 keys
 ```
 
 `npm run smoke` runs the real modules under Node (not re-implementations):
 the timetable engine, the Hold Rule, the mock ledger's invariants, the
-lazily-loaded 1.85 MB mushaf asset, the shared scoring helpers, and the
-heatmap calendar's week-column alignment.
+lazily-loaded 1.85 MB mushaf asset, the shared scoring helpers, the heatmap
+calendar's week-column alignment, and the Core contract rules.
 
 ---
 

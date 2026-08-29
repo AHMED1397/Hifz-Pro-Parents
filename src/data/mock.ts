@@ -60,6 +60,7 @@ export const STUDENTS: Student[] = [
     current_page: 146,
     current_line: 10,
     current_year: 2,
+    track: 'hifz',
     juz_target: 20,
     days_behind: 0,
     hold_active: false,
@@ -83,6 +84,7 @@ export const STUDENTS: Student[] = [
     current_page: 582,
     current_line: 6,
     current_year: 1,
+    track: 'hifz',
     juz_target: 6,
     days_behind: 1.5,
     hold_active: true,
@@ -201,6 +203,7 @@ function buildEntries(): DailyEntry[] {
           occasionalSabaqFail
             ? 'fail'
             : 'pass';
+        const creditedLines = result === 'pass' ? (lines ?? 0) : 0;
         out.push({
           id: `e-${student.id}-${iso}-${slot.type}`,
           student_id: student.id,
@@ -214,8 +217,12 @@ function buildEntries(): DailyEntry[] {
           ayah_to: slot.type === 'sabaq' ? 8 : 40,
           page_from: slot.type === 'manzil' ? pageTo : pageFrom,
           page_to: pageFrom,
-          line_from: lines ? 1 : undefined,
-          line_to: lines,
+          // CRITICAL BUSINESS RULE (Hifz Core): a failed lesson, or a Sabaq
+          // whose Nazira was not done, credits 0 lines — so it stores no range
+          // either. Revision slots are measured in juz, not lines.
+          line_from: creditedLines ? 1 : undefined,
+          line_to: creditedLines || undefined,
+          lines_count: creditedLines,
           juz_start: slot.type === 'manzil' ? 30 : student.current_juz,
           juz_list: slot.type === 'manzil' ? [29, 30] : undefined,
           juz_amount: slot.type === 'manzil' ? 2 : undefined,

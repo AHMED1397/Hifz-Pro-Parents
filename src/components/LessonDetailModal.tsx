@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
 import { getSurahById } from '@/data/surahs';
+import { creditedLines } from '@/lib/contract';
 import { formatGregorianDate } from '@/lib/hijri';
 import { LESSON_COLORS, lessonLabel } from './LessonCard';
 import type { DailyEntry } from '@/data/types';
@@ -25,7 +26,8 @@ export function LessonDetailModal({ entry, teacherName, onClose }: Props) {
 
   const c = LESSON_COLORS[entry.entry_type];
   const surah = getSurahById(entry.surah_id);
-  const lines = entry.line_to ? entry.line_to - (entry.line_from ?? 1) + 1 : null;
+  // Contract: a failed lesson (or a Sabaq without Nazira) credits 0 lines.
+  const lines = creditedLines(entry);
 
   const passed = entry.result === 'pass';
 
@@ -36,7 +38,7 @@ export function LessonDetailModal({ entry, teacherName, onClose }: Props) {
     {
       icon: 'resize-outline',
       label: t('parent.exactLines'),
-      value: lines ? `${lines} (Lines ${entry.line_from ?? 1}–${entry.line_to})` : '—',
+      value: lines ? `${lines}` : t('parent.noLinesCredited'),
     },
     {
       icon: 'eye-outline',

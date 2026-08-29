@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { DataSource } from '@/data/datasource';
+import { isDawr, juzTargetForYear } from '@/lib/contract';
 import { formatGregorianDate, formatHijriDate, getTodayISO } from '@/lib/hijri';
 import { useApp } from '@/context/AppProviders';
 import { LiveScheduleCard } from '@/components/LiveScheduleCard';
@@ -79,6 +80,9 @@ export default function DashboardScreen() {
 
   const hold = holdQuery.data;
   const firstName = activeChild?.full_name.split(' ')[0] ?? '';
+  // Year 4/5 are Dawr: the 30 juz are complete, so there is no new Sabaq to
+  // wait for and the pending card would be a lie.
+  const dawr = isDawr(activeChild?.track, activeChild?.current_year);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -158,6 +162,9 @@ export default function DashboardScreen() {
                   <Text style={styles.pagePillText}>
                     {t('parent.page')} {activeChild.current_page} · {t('parent.juz')}{' '}
                     {activeChild.current_juz ?? '—'}
+                    {activeChild.current_year
+                      ? ` · ${t('parent.yearShort', { year: activeChild.current_year })}`
+                      : ''}
                   </Text>
                 </View>
               ) : null}
@@ -182,7 +189,17 @@ export default function DashboardScreen() {
 
           {/* ── Today's lessons ───────────────────────────── */}
           <Text style={styles.sectionTitle}>{t('parent.todaysLessons')}</Text>
-          <LessonCard type="sabaq" entry={byType.sabaq} onPress={() => setInspecting(byType.sabaq ?? null)} />
+          {dawr ? (
+            <View style={styles.dawrCard}>
+              <View style={styles.dawrRow}>
+                <Ionicons name="sync-outline" size={18} color="#5B21B6" />
+                <Text style={styles.dawrTitle}>{t('parent.dawrTitle')}</Text>
+              </View>
+              <Text style={styles.dawrBody}>{t('parent.dawrBody')}</Text>
+            </View>
+          ) : (
+            <LessonCard type="sabaq" entry={byType.sabaq} onPress={() => setInspecting(byType.sabaq ?? null)} />
+          )}
           <LessonCard type="sabqi" entry={byType.sabqi} onPress={() => setInspecting(byType.sabqi ?? null)} />
           <LessonCard type="manzil" entry={byType.manzil} onPress={() => setInspecting(byType.manzil ?? null)} />
 
@@ -301,6 +318,17 @@ const styles = StyleSheet.create({
   holdRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   holdTitle: { fontSize: 13, fontWeight: '800', color: '#9A5E00' },
   holdBody: { fontSize: 12, color: '#7A4E00', marginTop: 6, lineHeight: 17 },
+  dawrCard: {
+    backgroundColor: '#F5F3FF',
+    borderLeftWidth: 4,
+    borderLeftColor: '#5B21B6',
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  dawrRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  dawrTitle: { fontSize: 13, fontWeight: '800', color: '#5B21B6' },
+  dawrBody: { fontSize: 12, color: '#4C3A99', marginTop: 6, lineHeight: 17 },
   mushafCta: { borderRadius: BorderRadius.card, padding: Spacing.md, marginBottom: Spacing.md },
   ctaRow: { flexDirection: 'row', alignItems: 'center' },
   ctaTitle: { color: '#fff', fontSize: 15, fontWeight: '800' },

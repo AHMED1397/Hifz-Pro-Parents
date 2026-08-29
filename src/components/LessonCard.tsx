@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
 import { getSurahById } from '@/data/surahs';
+import { creditedLines } from '@/lib/contract';
 import type { DailyEntry, EntryType } from '@/data/types';
 import { Colors, BorderRadius, Spacing } from '@/theme/tokens';
 
@@ -66,9 +67,9 @@ export function LessonCard({ entry, type, onPress }: Props) {
                 }`}
           </Text>
 
-          {entry.line_to ? (
+          {creditedLines(entry) > 0 ? (
             <DetailRow icon="resize-outline">
-              {t('parent.linesRecited')}: {entry.line_to - (entry.line_from ?? 1) + 1}
+              {t('parent.linesRecited')}: {creditedLines(entry)}
             </DetailRow>
           ) : null}
 

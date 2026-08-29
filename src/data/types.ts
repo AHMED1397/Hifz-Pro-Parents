@@ -37,6 +37,8 @@ export interface Class {
   division_id: DivisionId;
 }
 
+export type StudentTrack = 'hifz' | 'dawr' | 'nazira';
+
 export interface Student {
   id: string;
   admission_no: string;
@@ -49,6 +51,8 @@ export interface Student {
   current_page: number;
   current_line?: number;
   current_year?: number;
+  /** 'hifz' (memorising) · 'dawr' (30 juz done, revision only) · 'nazira'. */
+  track?: StudentTrack;
   juz_target?: number;
   days_behind: number;
   hold_active: boolean;
@@ -99,6 +103,11 @@ export interface DailyEntry {
   page_to: number;
   line_from?: number;
   line_to?: number;
+  /**
+   * Exact lines recited — the column the Core contract names. Older rows only
+   * have the line_from/line_to range, so read it through `creditedLines()`.
+   */
+  lines_count?: number;
   juz_start?: number;
   juz_amount?: number;
   juz_list?: number[];

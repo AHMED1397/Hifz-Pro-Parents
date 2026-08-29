@@ -10,6 +10,7 @@ import { DataSource } from '@/data/datasource';
 import { getSurahById } from '@/data/mock';
 import { formatGregorianDate } from '@/lib/hijri';
 import { buildHeatmapDays, heatmapTotals, type HeatmapDay } from '@/lib/heatmap';
+import { creditedLines } from '@/lib/contract';
 import { useApp } from '@/context/AppProviders';
 import { FilterChips } from '@/components/FilterChips';
 import { ActivityHeatmap } from '@/components/ActivityHeatmap';
@@ -133,7 +134,7 @@ export default function HistoryScreen() {
                 </Text>
                 <Text style={styles.rowSub}>
                   {formatGregorianDate(new Date(e.entry_date), i18n.language)} · {t('parent.page')} {e.page_from}
-                  {e.line_to ? ` · ${e.line_to - (e.line_from ?? 1) + 1} ${t('parent.lines')}` : ''}
+                  {creditedLines(e) ? ` · ${creditedLines(e)} ${t('parent.lines')}` : ''}
                 </Text>
                 {e.remark ? <Text style={styles.rowRemark}>{e.remark}</Text> : null}
               </View>

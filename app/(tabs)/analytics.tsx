@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { DataSource } from '@/data/datasource';
 import { getPageInfo } from '@/data/mushaf';
+import { creditedLines, isDawr, juzTargetForYear, totalCreditedLines, YEAR_TARGETS } from '@/lib/contract';
 import { useApp } from '@/context/AppProviders';
 import { FilterChips } from '@/components/FilterChips';
 import { Card } from '@/components/Card';
@@ -122,6 +123,7 @@ export default function AnalyticsScreen() {
   const stats = statsQuery.data;
   const quranProgress = Math.min(100, Math.round(((activeChild.current_page ?? 0) / 604) * 100));
   const juzInfo = getPageInfo(activeChild.current_page ?? 1);
+  const dawr = isDawr(activeChild.track, activeChild.current_year);
   const latestEntry = entries[entries.length - 1];
   const classTeacher = latestEntry ? teacherName(latestEntry.teacher_id) : '—';
   const passRate = stats?.pass_rate_percent ?? 0;
@@ -160,7 +162,7 @@ export default function AnalyticsScreen() {
         </View>
         <View style={styles.kpiRow}>
           <Kpi label={t('parent.attendance')} value={`${stats?.attendance_percent ?? 0}%`} icon="calendar-outline" />
-          <Kpi label={t('parent.juzRecited')} value={String(Math.round(barData.reduce((s, d) => s + d.value, 0)))} icon="layers-outline" />
+          <Kpi label={t('parent.linesTotal')} value={String(totalCreditedLines(entries))} icon="resize-outline" />
         </View>
 
         {/* ── Quran progress ────────────────────────────── */}
@@ -291,6 +293,20 @@ export default function AnalyticsScreen() {
           <DetailRow label={t('parent.city')} value={activeChild.city ?? '—'} />
           <DetailRow label={t('parent.joinedOn')} value={activeChild.joined_on ? formatDateShort(activeChild.joined_on, lang) : '—'} />
           <DetailRow label={t('parent.currentYear')} value={String(activeChild.current_year ?? '—')} />
+          <DetailRow
+            label={t('parent.track')}
+            value={
+              dawr ? t('parent.trackDawr') : (activeChild.track ?? 'hifz') === 'nazira' ? t('parent.trackNazira') : t('parent.trackHifz')
+            }
+          />
+          <DetailRow
+            label={t('parent.yearTarget')}
+            value={
+              YEAR_TARGETS[activeChild.current_year ?? 0]
+                ? `${t('parent.juz')} ${YEAR_TARGETS[activeChild.current_year ?? 0]!.from}–${YEAR_TARGETS[activeChild.current_year ?? 0]!.to}`
+                : t('parent.dawrShort')
+            }
+          />
           <DetailRow label={t('parent.currentTarget')} value={`${t('parent.page')} ${activeChild.current_page ?? '—'}`} />
           <DetailRow label={t('parent.juzTarget')} value={String(activeChild.juz_target ?? '—')} />
           <DetailRow label={t('parent.daysBehind')} value={String(activeChild.days_behind ?? 0)} last />
