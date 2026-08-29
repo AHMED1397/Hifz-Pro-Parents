@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 
 import { Colors } from '@/theme/tokens';
 import {
@@ -20,7 +19,7 @@ export { buildHeatmapDays };
 export type { CellState, HeatmapDay };
 
 // ─────────────────────────────────────────────────────────────
-// GitHub-style contribution calendar, drawn on react-native-svg.
+// GitHub-style contribution calendar.
 //
 // WHY HAND-BUILT: the three React Native heatmap packages on npm were all
 // evaluated and none is usable on this stack (Expo 57 / React 19.2 / RN 0.86):
@@ -33,8 +32,12 @@ export type { CellState, HeatmapDay };
 // The famous heatmaps (`react-calendar-heatmap`, `heatmap-calendar-react`) are
 // web-only: they need CSS classes and the DOM.
 //
-// So this renders the same week-column layout with react-native-svg, which is
-// already a dependency and is what those libraries render with anyway.
+// WHY PLAIN VIEWS, NOT SVG: the first version drew the cells as
+// react-native-svg `Rect`s with `onPress` on the shape. That crashes at render
+// on web — react-native-svg routes shape presses through the legacy
+// `TouchableMixin`, which logs "TouchableMixin is deprecated" and then throws
+// under React 19. `Pressable` cells are supported on every platform and let one
+// `cell` value drive both the pitch and the square, so the grid cannot drift.
 // ─────────────────────────────────────────────────────────────
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -56,7 +59,6 @@ export function ActivityHeatmap({ days, onSelect, cellSize = 15, gap = 4 }: Prop
   const weeks = useMemo(() => toWeeks(days), [days]);
 
   const labelW = 16;
-  const labelH = 14;
 
   // 30 days is only ~5 week columns, so fixed-size cells render as a small,
   // sparse block. Grow the squares to fill the card instead, capped so they
@@ -67,36 +69,28 @@ export function ActivityHeatmap({ days, onSelect, cellSize = 15, gap = 4 }: Prop
     return Math.max(12, Math.min(36, fit));
   }, [availW, weeks.length, cellSize, gap]);
 
-  const width = labelW + weeks.length * (cell + gap);
-  const height = labelH + 7 * (cell + gap);
-
-  /** Month label whenever the month changes between two columns. */
+  /** One month label per column, only where the month changes. */
   const monthLabels = useMemo(() => {
-    const out: Array<{ x: number; label: string }> = [];
     let lastMonth = -1;
-    weeks.forEach((week, col) => {
+    return weeks.map(week => {
       const firstReal = week.find(Boolean);
-      if (!firstReal) return;
+      if (!firstReal) return '';
       const m = firstReal.date.getMonth();
-      if (m !== lastMonth) {
-        out.push({ x: labelW + col * (cell + gap), label: MONTHS[m] });
-        lastMonth = m;
-      }
+      if (m === lastMonth) return '';
+      lastMonth = m;
+      return MONTHS[m];
     });
-    return out;
-  }, [weeks, cell, gap]);
+  }, [weeks]);
 
   const active = selected;
   const activeLabel = active
-    ? active.state === 'friday'
+    ? active.state === 'friday' || active.state === 'none'
       ? t('parent.greyNoClass')
-      : active.state === 'none'
-        ? t('parent.greyNoClass')
-        : active.state === 'fail'
-          ? t('parent.redNeedsRepeat')
-          : active.state === 'partial'
-            ? `${active.passed}/${active.total} · ${t('parent.redNeedsRepeat')}`
-            : `${active.passed}/${active.total} · ${t('parent.greenAllPassed')}`
+      : active.state === 'fail'
+        ? t('parent.redNeedsRepeat')
+        : active.state === 'partial'
+          ? `${active.passed}/${active.total} · ${t('parent.redNeedsRepeat')}`
+          : `${active.passed}/${active.total} · ${t('parent.greenAllPassed')}`
     : '';
 
   return (
@@ -104,62 +98,75 @@ export function ActivityHeatmap({ days, onSelect, cellSize = 15, gap = 4 }: Prop
       <View style={styles.titleRow}>
         <Text style={styles.title}>{t('parent.last30Days')}</Text>
         <Text style={styles.subtitle}>
-          {days.length ? `${days[0].date.getDate()} ${MONTHS[days[0].date.getMonth()]} – ` : ''}
-          {days.length ? `${days[days.length - 1].date.getDate()} ${MONTHS[days[days.length - 1].date.getMonth()]}` : ''}
+          {days.length
+            ? `${days[0].date.getDate()} ${MONTHS[days[0].date.getMonth()]} – ${days[
+                days.length - 1
+              ].date.getDate()} ${MONTHS[days[days.length - 1].date.getMonth()]}`
+            : ''}
         </Text>
       </View>
 
-      <View style={styles.svgWrap} onLayout={e => setAvailW(e.nativeEvent.layout.width)}>
-        <Svg width={width} height={height} style={styles.svg}>
-          {/* Weekday labels down the left edge */}
-          {WEEKDAY_LABELS.map((label, row) => (
-            <SvgText
-              key={`wd-${row}`}
-              x={0}
-              y={labelH + row * (cell + gap) + cell - Math.max(3, cell * 0.22)}
-              fontSize={Math.max(9, Math.min(12, cell * 0.55))}
-              fill={row === 5 ? Colors.textMuted : Colors.textSecondary}
-              fontWeight={row === 5 ? '700' : '400'}
-            >
-              {label}
-            </SvgText>
+      <View onLayout={e => setAvailW(e.nativeEvent.layout.width)}>
+        {/* Month labels */}
+        <View style={styles.monthRow}>
+          <View style={{ width: labelW }} />
+          {monthLabels.map((label, col) => (
+            <View key={`m-${col}`} style={{ width: cell, marginRight: col === monthLabels.length - 1 ? 0 : gap }}>
+              <Text style={styles.monthText}>{label}</Text>
+            </View>
           ))}
+        </View>
 
-          {/* Month labels along the top */}
-          {monthLabels.map(m => (
-            <SvgText key={`m-${m.label}-${m.x}`} x={m.x} y={10} fontSize={9} fill={Colors.textSecondary}>
-              {m.label}
-            </SvgText>
+        {/* Grid: weekday gutter + one column per week */}
+        <View style={styles.gridRow}>
+          <View style={{ width: labelW }}>
+            {WEEKDAY_LABELS.map((label, row) => (
+              <Text
+                key={`wd-${row}`}
+                style={[styles.weekdayText, { height: cell, marginBottom: row === 6 ? 0 : gap, lineHeight: cell }]}
+              >
+                {label}
+              </Text>
+            ))}
+          </View>
+
+          {weeks.map((week, col) => (
+            <View key={`w-${col}`} style={{ marginRight: col === weeks.length - 1 ? 0 : gap }}>
+              {week.map((day, row) => {
+                const isLastRow = row === 6;
+                if (!day) {
+                  return (
+                    <View
+                      key={`pad-${col}-${row}`}
+                      style={{ width: cell, height: cell, marginBottom: isLastRow ? 0 : gap }}
+                    />
+                  );
+                }
+                const isSelected = selected?.iso === day.iso;
+                return (
+                  <Pressable
+                    key={day.iso}
+                    onPress={() => {
+                      setSelected(day);
+                      onSelect?.(day);
+                    }}
+                    style={[
+                      styles.cell,
+                      {
+                        width: cell,
+                        height: cell,
+                        marginBottom: isLastRow ? 0 : gap,
+                        backgroundColor: fillFor(day),
+                        borderWidth: isSelected ? 2 : 0,
+                        borderColor: Colors.primary,
+                      },
+                    ]}
+                  />
+                );
+              })}
+            </View>
           ))}
-
-          {/* Day cells, one column per week */}
-          {weeks.map((week, col) =>
-            week.map((day, row) => {
-              if (!day) return null;
-              const x = labelW + col * (cell + gap);
-              const y = labelH + row * (cell + gap);
-              const isSelected = selected?.iso === day.iso;
-              return (
-                <Rect
-                  key={day.iso}
-                  x={x}
-                  y={y}
-                  width={cellSize}
-                  height={cellSize}
-                  rx={3.5}
-                  ry={3.5}
-                  fill={fillFor(day)}
-                  stroke={isSelected ? Colors.primary : 'transparent'}
-                  strokeWidth={isSelected ? 2 : 0}
-                  onPress={() => {
-                    setSelected(day);
-                    onSelect?.(day);
-                  }}
-                />
-              );
-            })
-          )}
-        </Svg>
+        </View>
       </View>
 
       {/* Legend */}
@@ -202,8 +209,11 @@ const styles = StyleSheet.create({
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 },
   title: { fontSize: 13, fontWeight: '800', color: Colors.text },
   subtitle: { fontSize: 11, color: Colors.textSecondary },
-  svgWrap: { width: '100%' },
-  svg: { alignSelf: 'center' },
+  monthRow: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 2 },
+  monthText: { fontSize: 9, color: Colors.textSecondary },
+  gridRow: { flexDirection: 'row', alignItems: 'flex-start' },
+  weekdayText: { fontSize: 9, color: Colors.textSecondary },
+  cell: { borderRadius: 3.5 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 12 },
   legendItem: { flexDirection: 'row', alignItems: 'center' },
   swatch: { width: 11, height: 11, borderRadius: 3, marginRight: 5 },

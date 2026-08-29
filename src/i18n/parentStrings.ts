@@ -19,6 +19,8 @@ export const parentStrings = {
       or: 'or',
     },
     notif: {
+      testSent: 'Test notification scheduled.',
+      testUnavailable: 'Push notifications are not available in the web preview — run the Android or iOS build.',
       sabaqPass: 'New lesson passed',
       sabaqFail: 'New lesson needs a repeat',
       revisionFail: '{{type}} needs a repeat',
@@ -227,6 +229,8 @@ export const parentStrings = {
       or: 'أو',
     },
     notif: {
+      testSent: 'تم جدولة إشعار تجريبي.',
+      testUnavailable: 'الإشعارات غير متاحة في معاينة الويب — شغّل نسخة أندرويد أو iOS.',
       sabaqPass: 'تم اجتياز الدرس الجديد',
       sabaqFail: 'الدرس الجديد يحتاج إلى إعادة',
       revisionFail: '{{type}} يحتاج إلى إعادة',
@@ -422,6 +426,8 @@ export const parentStrings = {
       or: 'அல்லது',
     },
     notif: {
+      testSent: 'சோதனை அறிவிப்பு திட்டமிடப்பட்டது.',
+      testUnavailable: 'வெப் மாதிரிக்காட்சியில் அறிவிப்புகள் கிடைக்காது — Android அல்லது iOS பதிப்பை இயக்கவும்.',
       sabaqPass: 'புதிய பாடம் வெற்றி',
       sabaqFail: 'புதிய பாடம் மீண்டும் தேவை',
       revisionFail: '{{type}} மீண்டும் தேவை',

@@ -21,6 +21,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { children: kids, lang, setLang, prefs, setPrefs, guardianPhone, setGuardianPhone, setDemoMode } = useApp();
   const [phone, setPhone] = useState('');
+  const [testResult, setTestResult] = useState<string | null>(null);
 
   const onSavePhone = () => {
     if (!phone.trim()) return;
@@ -121,8 +122,12 @@ export default function SettingsScreen() {
           variant="outline"
           size="sm"
           style={{ marginTop: Spacing.sm }}
-          onPress={() => scheduleTestNotification(t('notif.testTitle'), t('notif.testBody'))}
+          onPress={async () => {
+            const sent = await scheduleTestNotification(t('notif.testTitle'), t('notif.testBody'));
+            setTestResult(sent ? t('notif.testSent') : t('notif.testUnavailable'));
+          }}
         />
+        {testResult ? <Text style={styles.testResult}>{testResult}</Text> : null}
 
         {/* ── Contact ─────────────────────────────────────── */}
         <SectionTitle icon="location-outline">{t('parent.contact')}</SectionTitle>
@@ -211,6 +216,7 @@ const styles = StyleSheet.create({
   toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10 },
   toggleBorder: { borderBottomWidth: 1, borderBottomColor: Colors.divider },
   toggleLabel: { fontSize: 13, color: Colors.text },
+  testResult: { fontSize: 11, color: Colors.textSecondary, marginTop: 6 },
   contactLine: { fontSize: 13, fontWeight: '700', color: Colors.text },
   contactSub: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
 });

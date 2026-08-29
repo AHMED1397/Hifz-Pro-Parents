@@ -57,7 +57,7 @@ export default function RootLayout() {
                 <StatusBar style="dark" />
                 <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="(auth)/login" />
+                  <Stack.Screen name="(auth)" />
                   <Stack.Screen name="notifications" />
                   <Stack.Screen name="mushaf" options={{ presentation: 'fullScreenModal' }} />
                   <Stack.Screen name="student/[id]" />

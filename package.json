@@ -2,7 +2,7 @@
   "name": "hfz-parent",
   "version": "1.0.0",
   "main": "expo-router/entry",
-  "description": "Al Haqqaniyyah Hifz Section — Parent app (Hfz-Parent)",
+  "description": "Al Haqqaniyyah Hifz Section \u2014 Parent app (Hfz-Parent)",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "gen:mushaf": "node scripts/generate-mushaf.mjs",
-    "smoke": "tsx scripts/smoke-check.cts"
+    "smoke": "tsx scripts/smoke-check.cts",
+    "check:i18n": "node scripts/check-i18n.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/noto-naskh-arabic": "^0.4.5",

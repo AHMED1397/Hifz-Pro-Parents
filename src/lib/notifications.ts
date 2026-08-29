@@ -86,10 +86,18 @@ export function addResponseListener(handler: (url?: string) => void) {
   });
 }
 
-/** Local test notification — used by the Settings screen's "Send test" row. */
-export async function scheduleTestNotification(title: string, body: string) {
+/**
+ * Local test notification — used by the Settings screen's "Send test" row.
+ *
+ * Returns false on web: `expo-notifications` has no web implementation, so
+ * `scheduleNotificationAsync` throws "not available on web" there. Callers show
+ * that instead of letting the error reach LogBox.
+ */
+export async function scheduleTestNotification(title: string, body: string): Promise<boolean> {
+  if (Platform.OS === 'web') return false;
   await Notifications.scheduleNotificationAsync({
     content: { title, body, sound: 'default' },
     trigger: null,
   });
+  return true;
 }
